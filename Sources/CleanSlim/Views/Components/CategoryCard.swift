@@ -5,6 +5,7 @@
 //  Created by Me2 on 2025/5/18.
 //
 
+import AppKit
 import SwiftUI
 
 /// 分类卡片组件，显示缓存分类信息
@@ -73,6 +74,14 @@ public struct CategoryCard: View {
         .shadow(color: Color.black.opacity(0.1), radius: 5, x: 0, y: 2)
         .onTapGesture {
             onToggle()
+        }
+        // 添加右键菜单（放在修饰符链末尾）
+        .contextMenu {
+            Button {
+                NSWorkspace.shared.open(category.path)
+            } label: {
+                Label(LocalizationHelper.string("show.in.finder"), systemImage: "folder")
+            }
         }
     }
 }
