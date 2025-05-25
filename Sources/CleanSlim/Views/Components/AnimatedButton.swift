@@ -5,7 +5,6 @@
 //  Created by Me2 on 2025/5/18.
 //
 
-
 import SwiftUI
 
 /// 动画按钮组件，提供动态效果的按钮
@@ -27,7 +26,10 @@ public struct AnimatedButton: View {
     
     /// 按钮状态
     @State private var isPressed = false
-    
+
+    /// 鼠标悬浮状态
+    @State private var isHovered = false
+
     /// 旋转角度
     @State private var rotationDegree: Double = 0
     
@@ -76,12 +78,17 @@ public struct AnimatedButton: View {
             }
             .padding(.horizontal, 20)
             .padding(.vertical, 12)
-            .background(color)
+            .background(isHovered ? color : color.opacity(0.8))
             .foregroundColor(.white)
-            .cornerRadius(10)
-            .shadow(color: color.opacity(0.4), radius: 5, x: 0, y: 3)
-            .scaleEffect(isPressed ? 0.95 : 1.0)
+            .cornerRadius(9)
+            .shadow(color: color.opacity(isHovered ? 0.6 : 0.4), radius: isHovered ? 8 : 5, x: 0, y: isHovered ? 4 : 3)
+            .scaleEffect(isPressed ? 0.95 : (isHovered ? 1.02 : 1.0))
         }
         .buttonStyle(PlainButtonStyle())
+        .onHover { hovering in
+            withAnimation(.easeInOut(duration: 0.2)) {
+                isHovered = hovering
+            }
+        }
     }
 }
