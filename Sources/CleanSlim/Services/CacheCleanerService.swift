@@ -31,7 +31,7 @@ public class CacheCleanerService {
         let categories = [
             CacheCategory(
                 name: "system.cache",
-                iconName: "folder.fill",
+                iconName: "square.3.layers.3d.top.filled",
                 path: homeDirectory.appendingPathComponent("Library/Caches")
             ),
             CacheCategory(
@@ -51,12 +51,12 @@ public class CacheCleanerService {
             ),
             CacheCategory(
                 name: "app.state",
-                iconName: "app.fill",
+                iconName: "folder.fill.badge.gearshape",
                 path: homeDirectory.appendingPathComponent("Library/Saved Application State")
             ),
             CacheCategory(
                 name: "test.cache", // 分类标识
-                iconName: "externaldrive.fill", // 使用外置磁盘图标
+                iconName: "folder.fill.badge.plus", // 使用外置磁盘图标
                 path: URL(fileURLWithPath: "/Volumes/Store/output/tmp/") // 绝对路径
             )
         ]

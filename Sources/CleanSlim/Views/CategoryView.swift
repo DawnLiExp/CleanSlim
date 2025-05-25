@@ -57,7 +57,7 @@ public struct CategoryView: View {
             if viewModel.scanState == .scanned && viewModel.totalCacheSize > 0 {
                 AnimatedButton(
                     title: LocalizationHelper.string("clean"),
-                    iconName: "trash",
+                    iconName: "sparkles",
                     color: Color.green,
                     action: {
                         viewModel.cleanSelectedCaches()

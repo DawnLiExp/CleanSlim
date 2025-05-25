@@ -88,13 +88,13 @@ public struct CircularProgressView: View {
             
             // 添加延迟，确保动画可见
             DispatchQueue.main.asyncAfter(deadline: .now() + 0.1) {
-                withAnimation(.easeInOut(duration: 0.8)) {
+                withAnimation(.easeInOut(duration: 0.5)) {
                     self.animatedProgress = self.progress
                 }
                 
                 // 进度完成后显示勾号
                 if self.progress >= 1.0 {
-                    DispatchQueue.main.asyncAfter(deadline: .now() + 0.8) {
+                    DispatchQueue.main.asyncAfter(deadline: .now() + 0.4) {
                         withAnimation {
                             self.showCheckmark = true
                         }
