@@ -5,9 +5,8 @@
 //  Created by Me2 on 2025/5/18.
 //
 
-
-import Foundation
 import Combine
+import Foundation
 
 /// 文件管理器扩展，提供缓存文件操作功能
 public extension FileManager {
@@ -18,7 +17,7 @@ public extension FileManager {
         let keys: Set<URLResourceKey> = [.isRegularFileKey, .fileAllocatedSizeKey, .totalFileAllocatedSizeKey]
         
         // 获取目录内容
-        guard let enumerator = self.enumerator(at: url, includingPropertiesForKeys: Array(keys), options: [], errorHandler: { _, _ in true }) else {
+        guard let enumerator = enumerator(at: url, includingPropertiesForKeys: Array(keys), options: [], errorHandler: { _, _ in true }) else {
             return 0
         }
         
@@ -28,7 +27,8 @@ public extension FileManager {
         for case let fileURL as URL in enumerator {
             guard let resourceValues = try? fileURL.resourceValues(forKeys: keys),
                   let isRegularFile = resourceValues.isRegularFile,
-                  isRegularFile else {
+                  isRegularFile
+            else {
                 continue
             }
             
@@ -45,7 +45,7 @@ public extension FileManager {
     /// - Parameter url: 目录URL
     /// - Returns: 文件数量
     func fileCount(at url: URL) -> Int {
-        guard let enumerator = self.enumerator(at: url, includingPropertiesForKeys: [.isRegularFileKey], options: [], errorHandler: { _, _ in true }) else {
+        guard let enumerator = enumerator(at: url, includingPropertiesForKeys: [.isRegularFileKey], options: [], errorHandler: { _, _ in true }) else {
             return 0
         }
         
@@ -55,7 +55,8 @@ public extension FileManager {
         for case let fileURL as URL in enumerator {
             guard let resourceValues = try? fileURL.resourceValues(forKeys: [.isRegularFileKey]),
                   let isRegularFile = resourceValues.isRegularFile,
-                  isRegularFile else {
+                  isRegularFile
+            else {
                 continue
             }
             
@@ -97,7 +98,8 @@ public extension FileManager {
                     // 更新进度
                     let currentProgress = Double(index + 1) / Double(totalCount)
                     DispatchQueue.main.async {
-                        progress(currentProgress)
+                        // 确保进度值不超过1.0（100%）
+                        progress(min(currentProgress, 1.0))
                     }
                 }
                 
