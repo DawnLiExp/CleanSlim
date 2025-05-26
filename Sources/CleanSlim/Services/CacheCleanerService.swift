@@ -89,7 +89,7 @@ public class CacheCleanerService {
                     updatedCategories[index].fileCount = fileCount
                 }
                 // 添加延时以延长Scan动画效果
-                 Thread.sleep(forTimeInterval: 0.04)
+                 Thread.sleep(forTimeInterval: 0.003)
                 // 更新进度
                 let currentProgress = Double(index + 1) / Double(totalCategories)
                 DispatchQueue.main.async {
