@@ -11,59 +11,69 @@ import SwiftUI
 public struct MainView: View {
     /// 缓存扫描视图模型
     @StateObject private var viewModel = CacheScannerViewModel()
-    
+
     /// 当前语言
     @AppStorage("appLanguage") private var language = "en"
-    
+
     /// 强制刷新视图的状态
     @State private var refreshView = false
-    
+
     public init() {}
-    
+
     public var body: some View {
-        VStack(spacing: 24) {
-            // 顶部区域
-            headerView
-            
-            // 中间区域 - 分类卡片
-            ScrollView {
-                if viewModel.scanState == .idle || viewModel.scanState == .scanning {
-                    // 扫描视图
-                    ScanView(viewModel: viewModel)
-                        .padding(.horizontal)
-                } else if viewModel.scanState == .scanned {
-                    // 分类视图
-                    CategoryView(viewModel: viewModel)
-                } else if viewModel.scanState == .completed {
-                    // 清理完成视图 - 全屏显示
-                    CleanupCompletedView(viewModel: viewModel) {
-                        // 点击完成按钮后返回主界面
-                        viewModel.resetToScanState()
+        ZStack {
+            // 背景层 - 添加微纹理背景
+            TexturedBackgroundView(
+                backgroundColor: Color(.windowBackgroundColor),
+                textureOpacity: 0.03,
+                enableTexture: true
+            )
+            .edgesIgnoringSafeArea(.all)
+
+            // 内容层
+            VStack(spacing: 24) {
+                // 顶部区域
+                headerView
+
+                // 中间区域 - 分类卡片
+                ScrollView {
+                    if viewModel.scanState == .idle || viewModel.scanState == .scanning {
+                        // 扫描视图
+                        ScanView(viewModel: viewModel)
+                            .padding(.horizontal)
+                    } else if viewModel.scanState == .scanned {
+                        // 分类视图
+                        CategoryView(viewModel: viewModel)
+                    } else if viewModel.scanState == .completed {
+                        // 清理完成视图 - 全屏显示
+                        CleanupCompletedView(viewModel: viewModel) {
+                            // 点击完成按钮后返回主界面
+                            viewModel.resetToScanState()
+                        }
                     }
                 }
+
+                // 底部区域 - 清理进度
+                if viewModel.scanState == .cleaning {
+                    ProgressView(
+                        progress: viewModel.cleanProgress,
+                        statusText: LocalizationHelper.string("cleaning"),
+                        color: Color.green
+                    )
+                    .padding(.horizontal)
+                    .padding(.bottom)
+                }
             }
-            
-            // 底部区域 - 清理进度
-            if viewModel.scanState == .cleaning {
-                ProgressView(
-                    progress: viewModel.cleanProgress,
-                    statusText: LocalizationHelper.string("cleaning"),
-                    color: Color.green
-                )
-                .padding(.horizontal)
-                .padding(.bottom)
+            .padding(.vertical)
+            .frame(minWidth: 580, minHeight: 650)
+            .id(refreshView) // 使用id强制刷新视图
+            .onAppear {
+                // 应用启动时自动扫描
+                viewModel.startScan()
             }
-        }
-        .padding(.vertical)
-        .frame(minWidth: 580, minHeight: 650)
-        .background(Color(.windowBackgroundColor))
-        .id(refreshView) // 使用id强制刷新视图
-        .onAppear {
-            // 应用启动时自动扫描
-            viewModel.startScan()
         }
     }
-    
+
     /// 顶部区域视图
     private var headerView: some View {
         VStack(spacing: 16) {
@@ -81,7 +91,7 @@ public struct MainView: View {
                     }
                 }
                 Spacer()
-                
+
                 // 语言切换
                 Picker("", selection: $language) {
                     Text("🇺🇸").tag("en")
@@ -96,23 +106,36 @@ public struct MainView: View {
                 }
             }
             .padding(.horizontal)
-            
+
             // 总缓存大小显示
             VStack(spacing: 8) {
-                HStack {
-                    Text(LocalizationHelper.string("total.cache.size"))
-                        .font(.headline)
-                        .foregroundColor(.secondary)
-                
-                    Spacer()
-                
-                    Text(viewModel.formattedTotalSize)
-                        .font(.system(.title3, design: .monospaced))
-                        .fontWeight(.bold)
-                        .foregroundColor(Color.blue)
+                // 使用玻璃卡片背景
+                ZStack {
+                    VisualEffectView(
+                        material: .popover,
+                        blendingMode: .withinWindow,
+                        emphasized: false
+                    )
+                    .cornerRadius(10)
+
+                    HStack {
+                        Text(LocalizationHelper.string("total.cache.size"))
+                            .font(.headline)
+                            .foregroundColor(.secondary)
+
+                        Spacer()
+
+                        Text(viewModel.formattedTotalSize)
+                            .font(.system(.title3, design: .monospaced))
+                            .fontWeight(.bold)
+                            .foregroundColor(Color.blue)
+                    }
+                    .padding(.horizontal)
+                    .padding(.vertical, 8)
                 }
                 .padding(.horizontal)
-            
+                .frame(height: 44)
+
                 Divider()
                     .padding(.horizontal)
             }

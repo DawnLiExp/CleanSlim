@@ -16,6 +16,9 @@ public struct CategoryCard: View {
     /// 切换选中状态的回调
     let onToggle: () -> Void
     
+    /// 鼠标悬停状态
+    @State private var isHovered = false
+    
     public init(category: CacheCategory, onToggle: @escaping () -> Void) {
         self.category = category
         self.onToggle = onToggle
@@ -44,6 +47,7 @@ public struct CategoryCard: View {
             
             // 分隔线
             Divider()
+                .background(Color.primary.opacity(0.1))
             
             // 文件数量
             // 文件数量和缓存大小在同一行
@@ -69,9 +73,17 @@ public struct CategoryCard: View {
             }
         }
         .padding()
-        .background(Color(.controlBackgroundColor))
-        .cornerRadius(12)
-        .shadow(color: Color.black.opacity(0.1), radius: 5, x: 0, y: 2)
+        .background(
+            GlassCardBackground(
+                isHovered: isHovered,
+                isSelected: category.isSelected
+            )
+        )
+        .onHover { hovering in
+            withAnimation(.easeInOut(duration: 0.2)) {
+                isHovered = hovering
+            }
+        }
         .onTapGesture {
             onToggle()
         }
