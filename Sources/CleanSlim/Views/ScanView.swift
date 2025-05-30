@@ -11,15 +11,15 @@ import SwiftUI
 public struct ScanView: View {
     /// 缓存扫描视图模型
     @ObservedObject var viewModel: CacheScannerViewModel
-    
+
     public init(viewModel: CacheScannerViewModel) {
         self.viewModel = viewModel
     }
-    
+
     public var body: some View {
         VStack(spacing: 30) {
             Spacer()
-            
+
             // 扫描进度环
             CircularProgressView(
                 progress: viewModel.scanProgress,
@@ -27,14 +27,31 @@ public struct ScanView: View {
                 size: 100
             )
             .padding(.bottom, 20)
-            
+            // 扫描界面圆环背景 - 完全重写为渐变叠加方案
+            .overlay(
+                ZStack {
+                    // 基础圆形背景 - 无边界
+                    RadialGradient(
+                        gradient: Gradient(colors: [
+                            Color.blue.opacity(0.08), // 【参数11】中心颜色不透明度，范围0.05-0.15
+                            Color.blue.opacity(0.01), // 【参数12】边缘颜色不透明度，范围0.005-0.03
+                            Color.clear
+                        ]),
+                        center: .center,
+                        startRadius: 10, // 【参数13】内圆半径，范围5-20
+                        endRadius: 150 // 【参数14】外圆半径，范围120-180
+                    )
+                    .frame(width: 300, height: 300) // 【参数15】整体尺寸，应大于外圆半径*2
+                }
+            )
+
             // 扫描状态文本
             Text(LocalizationHelper.string("scanning"))
                 .font(.title2)
                 .foregroundColor(.secondary)
-            
+
             Spacer()
-            
+
             // 扫描按钮 - 修复参数匹配问题
             AnimatedButton(
                 title: LocalizationHelper.string("scan"),

@@ -78,7 +78,17 @@ public struct AnimatedButton: View {
             }
             .padding(.horizontal, 20)
             .padding(.vertical, 12)
-            .background(isHovered ? color : color.opacity(0.8))
+            .background(
+                LinearGradient(
+                    gradient: Gradient(colors: [
+                        isHovered ? color : color.opacity(0.9),
+                        isHovered ? color.opacity(0.9) : color.opacity(0.7)
+                    ]),
+                    startPoint: .top,
+                    endPoint: .bottom
+                )
+            )
+
             .foregroundColor(.white)
             .cornerRadius(9)
             .shadow(color: color.opacity(isHovered ? 0.6 : 0.4), radius: isHovered ? 8 : 5, x: 0, y: isHovered ? 4 : 3)

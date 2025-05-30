@@ -56,7 +56,45 @@ public struct MainView: View {
         }
         .padding(.vertical)
         .frame(minWidth: 580, minHeight: 650)
-        .background(Color(.windowBackgroundColor))
+        .background(
+            ZStack {
+                // 渐变背景
+                LinearGradient(
+                    gradient: Gradient(colors: [
+                        Color(.windowBackgroundColor),
+                        Color(.windowBackgroundColor).opacity(0.98),
+                        Color(.windowBackgroundColor)
+                    ]),
+                    startPoint: .top,
+                    endPoint: .bottom
+                )
+        
+                // 微妙的装饰元素 - 可调整参数
+                ZStack {
+                    // 左上角装饰 - 增强效果
+                    Circle()
+                        .fill(Color.blue.opacity(0.08)) // 【参数1】增加不透明度，范围0.05-0.15
+                        .frame(width: 220, height: 220) // 【参数2】增加尺寸，范围180-250
+                        .offset(x: -60, y: -60)
+                        .blur(radius: 50) // 【参数3】调整模糊半径，范围30-60
+            
+                    // 右下角装饰 - 增强效果
+                    Circle()
+                        .fill(Color.purple.opacity(0.09)) // 【参数4】增加不透明度，范围0.05-0.15
+                        .frame(width: 280, height: 280) // 【参数5】增加尺寸，范围220-300
+                        .offset(x: 130, y: 100)
+                        .blur(radius: 60) // 【参数6】调整模糊半径，范围40-70
+            
+                    // 中部装饰
+                    // Circle()
+                    //    .fill(Color.green.opacity(0.1)) // 【参数7】调整不透明度，范围0.04-0.12
+                    //    .frame(width: 120, height: 150) // 【参数8】调整尺寸，范围150-250
+                    //    .offset(x: 100, y: -310) // 【参数9】调整位置
+                    //    .blur(radius: 15) // 【参数10】调整模糊半径，范围40-70
+                }
+            }
+        )
+
         .id(refreshView) // 使用id强制刷新视图
         .onAppear {
             // 应用启动时自动扫描
@@ -73,6 +111,16 @@ public struct MainView: View {
                     Text(LocalizationHelper.string("app.title"))
                         .font(.largeTitle)
                         .fontWeight(.bold)
+                        .foregroundStyle(
+                            LinearGradient(
+                                colors: [
+                                    Color.primary,
+                                    Color.primary.opacity(0.7)
+                                ],
+                                startPoint: .leading,
+                                endPoint: .trailing
+                            )
+                        )
                     if let iconImage = Bundle.cleanSlimModule.image(named: "icon") {
                         Image(nsImage: iconImage)
                             .resizable()
@@ -80,8 +128,8 @@ public struct MainView: View {
                             .frame(width: 30, height: 30)
                     }
                 }
-                Spacer()
-                
+
+                Spacer() // 确保标题和语言切换分开
                 // 语言切换
                 Picker("", selection: $language) {
                     Text("🇺🇸").tag("en")
