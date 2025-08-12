@@ -24,6 +24,9 @@ public struct AnimatedButton: View {
     /// 是否显示加载动画
     var isLoading: Bool = false
     
+    /// 动画速度（秒）- 可调整参数
+    var animationDuration: Double = 0.6
+    
     /// 按钮状态
     @State private var isPressed = false
 
@@ -33,12 +36,13 @@ public struct AnimatedButton: View {
     /// 旋转角度
     @State private var rotationDegree: Double = 0
     
-    public init(title: String, iconName: String, color: Color, action: @escaping () -> Void, isLoading: Bool = false) {
+    public init(title: String, iconName: String, color: Color, action: @escaping () -> Void, isLoading: Bool = false, animationDuration: Double = 0.6) {
         self.title = title
         self.iconName = iconName
         self.color = color
         self.action = action
         self.isLoading = isLoading
+        self.animationDuration = animationDuration
     }
     
     public var body: some View {
@@ -62,11 +66,6 @@ public struct AnimatedButton: View {
                     Image(systemName: "arrow.triangle.2.circlepath")
                         .font(.system(size: 16, weight: .semibold))
                         .rotationEffect(.degrees(rotationDegree))
-                        .onAppear {
-                            withAnimation(Animation.linear(duration: 1.0).repeatForever(autoreverses: false)) {
-                                rotationDegree = 360
-                            }
-                        }
                 } else {
                     // 正常状态显示图标
                     Image(systemName: iconName)
@@ -78,17 +77,7 @@ public struct AnimatedButton: View {
             }
             .padding(.horizontal, 20)
             .padding(.vertical, 12)
-            .background(
-                LinearGradient(
-                    gradient: Gradient(colors: [
-                        isHovered ? color : color.opacity(0.9),
-                        isHovered ? color.opacity(0.9) : color.opacity(0.7)
-                    ]),
-                    startPoint: .top,
-                    endPoint: .bottom
-                )
-            )
-
+            .background(isHovered ? color : color.opacity(0.8))
             .foregroundColor(.white)
             .cornerRadius(9)
             .shadow(color: color.opacity(isHovered ? 0.6 : 0.4), radius: isHovered ? 8 : 5, x: 0, y: isHovered ? 4 : 3)
@@ -98,6 +87,24 @@ public struct AnimatedButton: View {
         .onHover { hovering in
             withAnimation(.easeInOut(duration: 0.2)) {
                 isHovered = hovering
+            }
+        }
+        // 监听isLoading变化，重新触发动画
+        .onChange(of: isLoading) { newValue in
+            if newValue {
+                // 重置旋转角度并重新触发动画
+                rotationDegree = 0
+                withAnimation(Animation.linear(duration: animationDuration).repeatForever(autoreverses: false)) {
+                    rotationDegree = 360
+                }
+            }
+        }
+        // 初始加载时触发动画
+        .onAppear {
+            if isLoading {
+                withAnimation(Animation.linear(duration: animationDuration).repeatForever(autoreverses: false)) {
+                    rotationDegree = 360
+                }
             }
         }
     }

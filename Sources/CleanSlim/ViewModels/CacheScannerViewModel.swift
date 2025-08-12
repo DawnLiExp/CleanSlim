@@ -11,6 +11,9 @@ import Foundation
 /// UserDefaults键常量
 private let kCategorySelectionsKey = "com.macoscachecleaner.categorySelections"
 
+/// 最小清理动画持续时间（秒）
+private let kMinCleanAnimationDuration: TimeInterval = 0.8 // 【参数1】可调整，范围1.0-5.0秒
+
 /// 缓存扫描器视图模型，处理缓存扫描和清理的业务逻辑
 public class CacheScannerViewModel: ObservableObject {
     /// 扫描状态
@@ -61,7 +64,6 @@ public class CacheScannerViewModel: ObservableObject {
         return ByteCountFormatter.string(fromBytes: cleanedSize)
     }
 
-    /// 初始化视图模型
     /// 初始化视图模型
     public init() {
         // 初始化缓存清理服务
@@ -190,6 +192,9 @@ public class CacheScannerViewModel: ObservableObject {
         // 更新状态
         scanState = .cleaning
         cleanProgress = 0.0
+        
+        // 记录开始时间
+        let startTime = Date()
 
         // 清理选中的缓存目录
         cacheCleanerService.cleanSelectedCacheDirectories(categories: categories, progress: { progress in
@@ -197,9 +202,47 @@ public class CacheScannerViewModel: ObservableObject {
         }, completion: { cleanedSize in
             // 更新已清理的大小
             self.cleanedSize = cleanedSize
-
-            // 更新状态为完成（不再自动重新扫描）
-            self.scanState = .completed
+            
+            // 计算已经过的时间
+            let elapsedTime = Date().timeIntervalSince(startTime)
+            
+            // 如果清理时间不足最小动画时间，添加延迟
+            if elapsedTime < kMinCleanAnimationDuration {
+                // 计算需要额外延迟的时间
+                let delayTime = kMinCleanAnimationDuration - elapsedTime
+                
+                // 在延迟期间，平滑过渡到100%进度
+                let remainingProgress = 1.0 - self.cleanProgress
+                let progressUpdateInterval = 0.05 // 【参数2】更新间隔，范围0.01-0.1秒
+                let progressSteps = Int(delayTime / progressUpdateInterval)
+                let progressIncrement = remainingProgress / Double(max(progressSteps, 1))
+                
+                // 创建定时器平滑更新进度
+                var currentStep = 0
+                Timer.scheduledTimer(withTimeInterval: progressUpdateInterval, repeats: true) { timer in
+                    currentStep += 1
+                    DispatchQueue.main.async {
+                        // 计算新进度，确保不超过1.0
+                        let newProgress = min(self.cleanProgress + (progressIncrement * Double(currentStep)), 1.0)
+                        self.cleanProgress = newProgress
+                    }
+                    
+                    // 达到步数或进度为1.0时停止定时器
+                    if currentStep >= progressSteps || self.cleanProgress >= 1.0 {
+                        timer.invalidate()
+                    }
+                }
+                
+                // 延迟后再切换到完成状态
+                DispatchQueue.main.asyncAfter(deadline: .now() + delayTime + 0.2) {
+              //  DispatchQueue.main.asyncAfter(deadline: .now() + delayTime + 0.1) { // 【参数6】额外增加0.2-0.5秒延迟
+                    // 更新状态为完成
+                    self.scanState = .completed
+                }
+            } else {
+                // 清理时间已经超过最小动画时间，直接切换到完成状态
+                self.scanState = .completed
+            }
         })
     }
 

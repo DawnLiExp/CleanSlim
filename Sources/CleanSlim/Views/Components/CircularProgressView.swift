@@ -83,21 +83,36 @@ public struct CircularProgressView: View {
         .frame(width: size, height: size)
         .onAppear {
             // 重置状态
-            self.animatedProgress = 0
+            self.isCompleted = false
             self.showCheckmark = false
             
             // 添加延迟，确保动画可见
-            DispatchQueue.main.asyncAfter(deadline: .now() + 0.1) {
-                withAnimation(.easeInOut(duration: 0.5)) {
+            DispatchQueue.main.asyncAfter(deadline: .now() + 0.01) {
+                withAnimation(.easeInOut(duration: 0.8)) { // 完成动画
                     self.animatedProgress = self.progress
                 }
                 
                 // 进度完成后显示勾号
                 if self.progress >= 1.0 {
-                    DispatchQueue.main.asyncAfter(deadline: .now() + 0.4) {
+                    DispatchQueue.main.asyncAfter(deadline: .now() + 0.2) {
                         withAnimation {
                             self.showCheckmark = true
                         }
+                    }
+                }
+            }
+        }
+        // 关键修复：监听progress变化并更新animatedProgress
+        .onChange(of: progress) { newProgress in
+            withAnimation(.easeInOut(duration: 0.3)) { // 清理动画
+                self.animatedProgress = newProgress
+            }
+            
+            // 进度完成后显示勾号
+            if newProgress >= 1.0 && !showCheckmark {
+                DispatchQueue.main.asyncAfter(deadline: .now() + 0.2) {
+                    withAnimation {
+                        self.showCheckmark = true
                     }
                 }
             }

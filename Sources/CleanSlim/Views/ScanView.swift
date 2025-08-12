@@ -20,11 +20,12 @@ public struct ScanView: View {
         VStack(spacing: 30) {
             Spacer()
 
-            // 扫描进度环
+            // 进度环 - 根据状态显示扫描或清理进度
             CircularProgressView(
-                progress: viewModel.scanProgress,
+                progress: viewModel.scanState == .cleaning ? viewModel.cleanProgress : viewModel.scanProgress,
                 color: Color.blue,
-                size: 100
+                size: 100,
+                showCompletionAnimation: viewModel.scanState != .cleaning // 清理状态下不显示完成动画
             )
             .padding(.bottom, 20)
             // 扫描界面圆环背景 - 完全重写为渐变叠加方案
@@ -60,7 +61,8 @@ public struct ScanView: View {
                 action: {
                     viewModel.startScan()
                 },
-                isLoading: viewModel.scanState == .scanning
+                isLoading: viewModel.scanState == .scanning,
+                animationDuration: 1.6
             )
             .padding(.bottom, 40)
         }
